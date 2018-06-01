@@ -126,80 +126,31 @@ router.post('/create', (req, res, next) => {
 
 
 // Update User //
-router.put('/update', (req, res, next) => {
-  // console.log(req.body);
+router.post('/update', async (req, res, next) => {
 
   let updatedUser = req.body;
 
-  console.log(updatedUser);
-
-  User.findById(updatedUser._id, (err, data) => {
-    if (err) {
-      return res.json({
-        action: "Error: " + err.message,
-        status: 'error',
-        code: 444
-      });
-    }
-
-    let user = data;
-
-    console.log(user);
-
-    let username = updatedUser.username;
-    let email = updatedUser.email;
-    // let password = updatedUser.password;
-
-    let firstname = updatedUser.firstname;
-    let lastname = updatedUser.lastname;
-    let sex = updatedUser.sex;
-    let birth = updatedUser.birth;
-
-    let street = updatedUser.street;
-    let neighborhood = updatedUser.neighborhood;
-    let city = updatedUser.city;
-    let postal_code = updatedUser.postal_code;
-
-    let type = updatedUser.type;
-    let status = updatedUser.status;
-
-    // Birth
-    birth = new Date(birth);
-
-    user.username = username;
-    user.email = email;
-    // user.password = password;
-
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.sex = sex;
-    user.birth = birth;
-
-    user.street = street;
-    user.neighborhood = neighborhood;
-    user.city = city;
-    user.postal_code = postal_code;
-
-    user.type = type;
-    user.status = status;
-
-    user.save((err) => {
-      if (err) {
-        return res.json({
-          action: "Error: " + err.message,
-          status: 'error',
-          code: 444
-        });
-      } else {
-        return res.json({
-          action: 'User updated',
-          user: user,
-          status: 'ok',
-          code: 200
-        });
-      }
-    });
-  });
+  User.findOneAndUpdate(
+    {
+      _id: updatedUser._id,
+    },
+    {
+      $set: {
+        userImage: updatedUser.userImage,
+        name: updatedUser.name,
+        city: updatedUser.city,
+        state: updatedUser.state,
+      },
+    },
+    {
+      new: true,
+      projection: {
+        password: 0,
+        __v: 0,
+      },
+    },
+  ).then(payload => res.status(200).json({ payload }))
+  .catch(error => {throw res.status(404).json(error)});
 });
 
 // Delete User // 
