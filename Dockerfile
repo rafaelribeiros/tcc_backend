@@ -1,6 +1,6 @@
 FROM node:8
 
-WORKDIR /home/user/civita_dev
+WORKDIR /home/user/civita
 
 COPY src src/
 COPY yarn.lock .babelrc package.json ./
