@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/vigilancia');
+mongoose.connect('mongodb://civitaAppUser:p55dGFaNsXj94B7b@civitaapp-shard-00-00-pywii.mongodb.net:27017,civitaapp-shard-00-01-pywii.mongodb.net:27017,civitaapp-shard-00-02-pywii.mongodb.net:27017/civita?ssl=true&replicaSet=civitaApp-shard-0&authSource=admin&retryWrites=true');
 mongoose.connection.on('error', (err) => {
   console.log('Mongo error: ' + err);
 });
