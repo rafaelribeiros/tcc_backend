@@ -13,7 +13,7 @@ USER user
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 RUN ~/.yarn/bin/yarn
-RUN ~/.yarn/bin/yarn start
+# RUN ~/.yarn/bin/yarn start
 
 EXPOSE 3000
 
