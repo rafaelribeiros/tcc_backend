@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node ./src/bin/www",
-    "start": "node dist/app.js",
+    "start": "node dist/bin/www",
     "test": "nodemon ./src/bin/www",
-    "build": "babel src --out-dir dist --source-maps"
+    "build": "babel src --out-dir dist --source-maps --copy-files"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
