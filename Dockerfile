@@ -2,7 +2,7 @@ FROM node:8
 
 WORKDIR /home/user/civita
 
-COPY src src/
+COPY src root/
 COPY yarn.lock .babelrc package.json ./
 
 RUN adduser --disabled-password --gecos "" user
