@@ -6,6 +6,72 @@ const router = express.Router();
 const User = require('model/User');
 const bcrypt = require('bcrypt-nodejs');
 
+router.post('/login', (req, res, next) => {
+  let email = req.body.email;
+  let password = req.body.password
+
+  User.findOne({
+    'email': email,
+    'password': password
+  }, function (err, user) {
+    if (err) return handleError(err);
+
+    if (user) {
+      user.password = ''
+      return res.json({
+        action: 'User Logged',
+        user: user,
+        status: 'ok',
+        code: 200
+      });
+    } else {
+      return res.json({
+        action: 'Email/Senha incorretos',
+        status: 'error',
+        code: 401
+      });
+    }
+  });
+});
+
+router.post('/approve', (req, res, next) => {
+  let userId = req.body.userId;
+  let verifyImage = req.body.verifyImage;
+
+  User.findById(user_id, (err, user) => {
+    if (err) return handleError(err);
+
+    if (user) {
+      user.status = "PENDING";
+      user.verifyImage = verifyImage
+      user.save((err) => {
+        if (err) {
+          return res.json({
+            action: "Error: " + err.message,
+            status: 'error',
+            code: 444
+          });
+        } else {
+          return res.json({
+            action: 'User approved',
+            user: user,
+            status: 'ok',
+            code: 200
+          });
+        }
+      });
+    } else {
+      return res.json({
+        action: 'User not approved',
+        status: 'error',
+        code: 401
+      });
+    }
+
+  });
+});
+
+
 // CRUD methods
 // Create User //
 router.post('/create', (req, res, next) => {
@@ -25,7 +91,7 @@ router.post('/create', (req, res, next) => {
   let postal_code = req.body.postal_code
 
   // Hashing password
-  password = bcrypt.hashSync(password);
+  // password = bcrypt.hashSync(password);
 
   // Date convert
   birth = new Date(birth);
@@ -82,7 +148,7 @@ router.put('/update', (req, res, next) => {
 
     let username = updatedUser.username;
     let email = updatedUser.email;
-    let password = updatedUser.password;
+    // let password = updatedUser.password;
 
     let firstname = updatedUser.firstname;
     let lastname = updatedUser.lastname;
@@ -102,7 +168,7 @@ router.put('/update', (req, res, next) => {
 
     user.username = username;
     user.email = email;
-    user.password = password;
+    // user.password = password;
 
     user.firstname = firstname;
     user.lastname = lastname;

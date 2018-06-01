@@ -3,18 +3,20 @@
 const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
-	post: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'posts'
-	},
-	comment: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'comments'
-	},
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'users',
 		require: true
+	},
+	post: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'posts',
+		require: false
+	},
+	comment: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'comments',
+		require: false
 	},
 	description: {
 		type: String,

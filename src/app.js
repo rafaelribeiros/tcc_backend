@@ -20,6 +20,7 @@ var index = require('route/index');
 var users = require('route/users');
 var posts = require('route/posts');
 var comments = require('route/comments');
+var reports = require('route/reports');
 
 var app = express();
 

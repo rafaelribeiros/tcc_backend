@@ -52,7 +52,7 @@ router.post('/create', (req, res, next) => {
 
 
 // Update Post //
-router.put('/update', (req, res, next) => {
+router.post('/update', (req, res, next) => {
 	// console.log(req.body);
 
 	let updatedPost = req.body;
@@ -99,7 +99,7 @@ router.put('/update', (req, res, next) => {
 });
 
 // Delete User // 
-router.delete('/delete', (req, res, next) => {
+router.post('/delete', (req, res, next) => {
 	let post_id = req.body.id;
 	Post.findById(post_id, (err, data) => {
 		if (err) {
@@ -110,8 +110,8 @@ router.delete('/delete', (req, res, next) => {
 			});
 		}
 		let Post = data;
-
-		Post.remove((err) => {
+		Post.status = "deleted";
+		Post.save((err) => {
 			if (err) {
 				return res.json({
 					action: "Error: " + err.message,
@@ -263,28 +263,36 @@ router.get('/all', (req, res, next) => {
 router.get('/all_close', (req, res, next) => {
 	let lat = req.query.lat;
 	let lng = req.query.lng;
+	let page = req.query.p;
+
+	if (!page) {
+		page = 0;
+	}
 
 	let coords = {
 		type: 'Point',
 		coordinates: [lat, lng]
 	};
 
-	Post.find({
-			loc: {
-				$near: coords
-			}
+	let query = Post.find({
+		loc: {
+			$near: coords
 		},
-		(err, docs) => {
-			if (!err) {
-				return res.json(JSON.stringify(docs));
-			} else {
-				return res.json({
-					action: "Error: " + err.message,
-					status: 'error',
-					code: 444
-				});
-			}
-		});
+	}).skip(page * 10).limit(10);
+
+	query.exec((err, docs) => {
+		if (!err) {
+			console.log(docs.length);
+			return res.json(JSON.stringify(docs));
+		} else {
+			return res.json({
+				action: "Error: " + err.message,
+				status: 'error',
+				code: 444
+			});
+		}
+	});
+
 });
 
 // Get by id
@@ -344,7 +352,7 @@ router.get('/create_dump', (req, res, next) => {
 });
 
 // Delete All
-router.delete('/all_delete', (req, res, next) => {
+router.post('/all_delete', (req, res, next) => {
 	Post.find({}, (err, data) => {
 		let posts = data;
 
