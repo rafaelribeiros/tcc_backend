@@ -206,10 +206,10 @@ router.get('/id/:user_id', (req, res, next) => {
   let user_id = req.params.user_id;
 
   User.findById(user_id, (err, docs) => {
-    if (!err) {
-      return res.json(JSON.stringify(docs));
+    if (docs !== null) {
+      return res.status(200).json(docs);
     } else {
-      return res.json({
+      return res.status(444).json({
         action: "Error: " + err.message,
         status: 'error',
         code: 444
