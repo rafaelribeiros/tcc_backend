@@ -286,7 +286,7 @@ router.get('/all', (req, res, next) => {
 	})
 });
 
-router.get('/all_close', (req, res, next) => {
+router.get('/close', (req, res, next) => {
 	let lat = parseFloat(req.query.lat, 10);
 	let lng = parseFloat(req.query.lng, 10);
 	let $skip = parseInt(req.query.skip, 10);
@@ -339,7 +339,7 @@ router.get('/all_close', (req, res, next) => {
 		}
 	]).then(resp => {
 		if (resp !== null) {
-			return res.status(201).json(resp)
+			return res.status(201).json({ payload: resp })
 		}
 		throw res.status(444).json('Erro')
 	})
