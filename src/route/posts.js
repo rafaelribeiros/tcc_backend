@@ -15,22 +15,29 @@ const User = require('model/User');
 // Create Post //
 router.post('/create', (req, res, next) => {
 	console.log(req.body);
-	let user = req.body.user;
+	let userId = req.body.userId;
 	let title = req.body.title;
 	let description = req.body.description;
 	let type = req.body.type;
 	let lat = req.body.lat;
 	let lng = req.body.lng;
+	let anonymus = req.body.anonymus;
+	let placeDescription = req.body.placeDescription;
+	let imageUrl = req.body.imageUrl;
 
 	let post = new Post({
-		user: user._id,
+		user: userId,
 		title: title,
 		description: description,
 		type: type,
 		loc: {
 			type: 'Point',
 			coordinates: [lat, lng]
-		}
+		},
+		anonymus: anonymus,
+		placeDescription: placeDescription,
+		imageUrl: imageUrl
+
 	});
 	post.save((err) => {
 		if (err) {
