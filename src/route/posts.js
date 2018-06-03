@@ -24,7 +24,7 @@ router.post('/create', (req, res, next) => {
 	let lng = req.body.lng;
 	let anonymus = req.body.anonymus;
 	let placeDescription = req.body.placeDescription;
-	let imageUrl = req.body.imageUrl;
+	let imgUrl = req.body.imgUrl;
 
 	let post = new Post({
 		user: userId,
@@ -38,7 +38,7 @@ router.post('/create', (req, res, next) => {
 		},
 		anonymus: anonymus,
 		placeDescription: placeDescription,
-		imageUrl: imageUrl
+		imgUrl: imgUrl
 
 	});
 	post.save().then(payload => {
