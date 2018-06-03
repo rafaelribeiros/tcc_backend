@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema({
     password: { type: String, require: true },
     type: { type: String, require: false, default: "citizen" },
     status: { type: String, require: false, default: "UNVERIFIED" },
-
+    userImage: { type: String, require: false },
+    verifyImage: { type: String, require: false },
+    
     // personal
     firstname: { type: String, require: true },
     lastname: { type: String, require: false },
