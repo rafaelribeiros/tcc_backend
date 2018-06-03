@@ -286,7 +286,7 @@ router.get('/all', (req, res, next) => {
 	})
 });
 
-router.get('/close', (req, res, next) => {
+router.get('/all_close', (req, res, next) => {
 	let lat = parseFloat(req.query.lat, 10);
 	let lng = parseFloat(req.query.lng, 10);
 	let $skip = parseInt(req.query.skip, 10);
