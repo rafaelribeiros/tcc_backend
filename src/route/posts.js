@@ -305,6 +305,7 @@ router.get('/all_close', (req, res, next) => {
 			}
 		},
 		{ $skip },
+		{ $limit: 10 },
 		{
 			$lookup: {
 				from: 'users',
@@ -349,7 +350,7 @@ router.get('/id/:post_id', async (req, res, next) => {
 	const { ObjectId } = mongoose.Types;
 	let post_id = req.params.post_id;
 
-	const [ post ] = await Post.aggregate([
+	const [post] = await Post.aggregate([
 		{
 			$match: {
 				_id: ObjectId(post_id)
