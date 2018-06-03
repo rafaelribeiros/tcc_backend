@@ -43,6 +43,10 @@ const postSchema = new mongoose.Schema({
 		require: true,
 		default: 0
 	},
+	voted: {
+		type: Boolean,
+		default: false
+	},
 	status: {
 		type: String,
 		require: true,

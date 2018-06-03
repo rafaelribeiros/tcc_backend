@@ -7,6 +7,7 @@ const Post = require('model/Post');
 const Vote = require('model/Vote');
 
 const bcrypt = require('bcrypt-nodejs');
+const mongoose = require('mongoose');
 
 // Test
 const User = require('model/User');
@@ -245,69 +246,151 @@ router.post('/vote', (req, res, next) => {
 
 // Get all post
 router.get('/all', (req, res, next) => {
-	Post.find({}, (err, docs) => {
-		if (!err) {
-			return res.json(JSON.stringify(docs));
-		} else {
-			return res.json({
-				action: "Error: " + err.message,
-				status: 'error',
-				code: 444
-			});
+	return Post.aggregate([
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'user',
+				foreignField: '_id',
+				as: 'user',
+			},
+		},
+		{ $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+		{
+			$project: {
+				'user._id': 1,
+				'user.name': 1,
+				'user.userImage': 1,
+				'user.city': 1,
+				'user.state': 1,
+				'user.email': 1,
+				title: 1,
+				loc: 1,
+				karma: 1,
+				description: 1,
+				imgUrl: 1,
+				placeDescription: 1,
+				createdAt: 1,
+				voted: 1,
+				status: 1,
+				authorId: 1,
+				type: 1,
+				anonymous: 1,
+			},
 		}
-	});
+	]).then(resp => {
+		if (resp !== null) {
+			return res.status(201).json(resp)
+		}
+		throw res.status(444).json('Erro')
+	})
 });
 
 router.get('/all_close', (req, res, next) => {
-	let lat = req.query.lat;
-	let lng = req.query.lng;
-	let page = req.query.p;
+	let lat = parseFloat(req.query.lat, 10);
+	let lng = parseFloat(req.query.lng, 10);
+	let $skip = parseInt(req.query.skip, 10);
 
-	if (!page) {
-		page = 0;
-	}
-
-	let coords = {
-		type: 'Point',
-		coordinates: [lat, lng]
-	};
-
-	let query = Post.find({
-		loc: {
-			$near: coords
+	return Post.aggregate([
+		{
+			$geoNear: {
+				near: {
+					type: 'Point',
+					coordinates: [lat, lng],
+				},
+				distanceField: "dist.calculated",
+				maxDistance: 1000,
+				maxDistance: 2000,
+				spherical: true
+			}
 		},
-	}).skip(page * 10).limit(10);
-
-	query.exec((err, docs) => {
-		if (!err) {
-			console.log(docs.length);
-			return res.json(JSON.stringify(docs));
-		} else {
-			return res.json({
-				action: "Error: " + err.message,
-				status: 'error',
-				code: 444
-			});
+		{ $skip },
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'user',
+				foreignField: '_id',
+				as: 'user',
+			},
+		},
+		{ $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+		{
+			$project: {
+				'user._id': 1,
+				'user.name': 1,
+				'user.userImage': 1,
+				'user.city': 1,
+				'user.state': 1,
+				'user.email': 1,
+				title: 1,
+				loc: 1,
+				karma: 1,
+				description: 1,
+				imgUrl: 1,
+				placeDescription: 1,
+				createdAt: 1,
+				voted: 1,
+				status: 1,
+				authorId: 1,
+				type: 1,
+				anonymous: 1,
+			},
 		}
-	});
-
+	]).then(resp => {
+		if (resp !== null) {
+			return res.status(201).json(resp)
+		}
+		throw res.status(444).json('Erro')
+	})
 });
 
 // Get by id
-router.get('/id/:post_id', (req, res, next) => {
+router.get('/id/:post_id', async (req, res, next) => {
+	const { ObjectId } = mongoose.Types;
 	let post_id = req.params.post_id;
 
-	Post.findById(post_id, (err, docs) => {
-		if (!err) {
-			return res.json(JSON.stringify(docs));
-		} else {
-			return res.json({
-				action: "Error: " + err.message,
-				status: 'error',
-				code: 444
-			});
+	const [ post ] = await Post.aggregate([
+		{
+			$match: {
+				_id: ObjectId(post_id)
+			}
+		},
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'user',
+				foreignField: '_id',
+				as: 'user',
+			},
+		},
+		{ $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+		{
+			$project: {
+				'user._id': 1,
+				'user.name': 1,
+				'user.userImage': 1,
+				'user.city': 1,
+				'user.state': 1,
+				'user.email': 1,
+				title: 1,
+				loc: 1,
+				karma: 1,
+				description: 1,
+				imgUrl: 1,
+				placeDescription: 1,
+				createdAt: 1,
+				voted: 1,
+				status: 1,
+				authorId: 1,
+				type: 1,
+				anonymous: 1,
+			},
 		}
-	});
+	])
+	if (post !== undefined) {
+		return res.status(201).json(post)
+	}
+	throw res.status(444).json({ message: 'Postagem não encontrada' })
 });
 
 
