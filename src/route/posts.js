@@ -15,6 +15,7 @@ const User = require('model/User');
 // Create Post //
 router.post('/create', (req, res, next) => {
 	console.log(req.body);
+	let user = req.body.user
 	let userId = req.body.userId;
 	let title = req.body.title;
 	let description = req.body.description;
@@ -27,6 +28,7 @@ router.post('/create', (req, res, next) => {
 
 	let post = new Post({
 		user: userId,
+		authorId: userId,
 		title: title,
 		description: description,
 		type: type,
@@ -39,22 +41,11 @@ router.post('/create', (req, res, next) => {
 		imageUrl: imageUrl
 
 	});
-	post.save((err) => {
-		if (err) {
-			return res.json({
-				action: "Error: " + err.message,
-				status: 'error',
-				code: 444
-			});
-		} else {
-			return res.json({
-				action: 'New post created',
-				post: post,
-				status: 'ok',
-				code: 200
-			});
-		}
-	});
+	post.save().then(payload => {
+		payload.user = user
+		res.status(200).json({ payload })
+	})
+		.catch(error => { throw res.status(404).json(error) });
 });
 
 

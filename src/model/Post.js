@@ -3,11 +3,16 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-	user: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'users',
-		require: true
+	anonymus: {
+		type: Boolean,
+		default: false
 	},
+	placeDescription: {
+		type: String,
+		require: false
+	},
+	authorId: { type: mongoose.Schema.Types.ObjectId, required: true },
+	user: { type: mongoose.Schema.Types.ObjectId, required: true, index: true, ref: 'users', },
 	title: {
 		type: String,
 		require: true
