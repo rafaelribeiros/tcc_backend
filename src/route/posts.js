@@ -291,14 +291,14 @@ router.get('/all_close', (req, res, next) => {
 	let lng = parseFloat(req.query.lng, 10);
 	let $skip = parseInt(req.query.skip, 10);
 
-	return Post.aggregate([
+	Post.aggregate([
 		{
 			$geoNear: {
 				near: {
 					type: 'Point',
 					coordinates: [lat, lng],
 				},
-				distanceField: "dist.calculated",
+				distanceField: "loc",
 				maxDistance: 1000,
 				maxDistance: 2000,
 				spherical: true
