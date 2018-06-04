@@ -292,7 +292,7 @@ router.get("/all_close", (req, res, next) => {
   let lng = parseFloat(req.query.lng, 10);
   let $skip = parseInt(req.query.skip, 10);
 
-  Post.aggregate([
+  return Post.aggregate([
     {
       $geoNear: {
         near: {
