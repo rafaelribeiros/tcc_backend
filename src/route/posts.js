@@ -300,8 +300,7 @@ router.get("/all_close", (req, res, next) => {
           "coordinates": [lng, lat]
         },
         distanceField: "dist.calculated",
-        maxDistance: 1000,
-        maxDistance: 2000,
+        maxDistance: 5000,
         spherical: true
       }
     },
