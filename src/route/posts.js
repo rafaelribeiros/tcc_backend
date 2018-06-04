@@ -295,10 +295,10 @@ router.get('/all_close', (req, res, next) => {
 		{
 			$geoNear: {
 				near: {
-					type: 'Point',
+					type: "Point",
 					coordinates: [lat, lng],
 				},
-				distanceField: "loc",
+				distanceField: "dist.calculated",
 				maxDistance: 1000,
 				maxDistance: 2000,
 				spherical: true
