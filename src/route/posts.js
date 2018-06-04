@@ -334,7 +334,7 @@ router.get("/all_close", (req, res, next) => {
         status: 1,
         authorId: 1,
         type: 1,
-        anonymous: 1
+        anonymus: 1
       }
     }
   ])
