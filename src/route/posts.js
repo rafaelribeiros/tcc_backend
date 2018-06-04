@@ -318,7 +318,7 @@ router.get("/all_close", (req, res, next) => {
     {
       $project: {
         "user._id": 1,
-        "user.name": 1,
+        "user.firstname": 1,
         "user.userImage": 1,
         "user.city": 1,
         "user.state": 1,
