@@ -260,7 +260,7 @@ router.get("/all", (req, res, next) => {
     {
       $project: {
         "user._id": 1,
-        "user.name": 1,
+        "user.firstname": 1,
         "user.userImage": 1,
         "user.city": 1,
         "user.state": 1,
@@ -276,7 +276,7 @@ router.get("/all", (req, res, next) => {
         status: 1,
         authorId: 1,
         type: 1,
-        anonymous: 1
+        anonymus: 1
       }
     }
   ]).then(resp => {
