@@ -12,18 +12,20 @@ const bcrypt = require('bcrypt-nodejs');
 const User = require('model/User');
 const Post = require('model/Post');
 
+const mongoose = require("mongoose");
+
 // CRUD methods
 // Create Comment //
 router.post('/create', (req, res, next) => {
 	console.log(req.body);
 	let post = req.body.post;
-	let comment = req.body.comment;
+	// let comment = req.body.comment;
 	let user = req.body.user;
 	let description = req.body.description;
 
 	let newComment = new Comment({
 		post: post,
-		comment: comment,
+		// comment: comment,
 		user: user,
 		description: description
 	});
@@ -43,6 +45,63 @@ router.post('/create', (req, res, next) => {
 			});
 		}
 	});
+});
+
+router.get("/all/:postId", (req, res, next) => {
+  const { ObjectId } = mongoose.Types;
+  let postId = req.params.postId;
+  return Comment.aggregate([
+    {
+      $match: {
+				deleted: false,
+				post: ObjectId(postId)
+      }
+    },
+    {
+      $sort: { createdAt: -1, _id: -1 },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        "user._id": 1,
+        "user.firstname": 1,
+        "user.userImage": 1,
+        "user.city": 1,
+        "user.state": 1,
+        "user.email": 1,
+				description: 1,
+				createdAt: 1,
+				deleted:1,
+        // votedNegative: {
+        //   $cond: {
+        //     if: { $setIsSubset: [[ObjectId(userId)], '$negativeVotes'] },
+        //     then: true,
+        //     else: false,
+        //   },
+        // },
+        // votedPositive: {
+        //   $cond: {
+        //     if: { $setIsSubset: [[ObjectId(userId)], '$positiveVotes'] },
+        //     then: true,
+        //     else: false,
+        //   },
+        // },
+      }
+    }
+  ]).then(resp => {
+    if (resp !== null) {
+      return res.status(201).json(resp);
+    }
+    throw res.status(444).json("Erro");
+  });
 });
 
 
@@ -99,33 +158,35 @@ router.put('/update', (req, res, next) => {
 });
 
 // Delete User // 
-router.delete('/delete', (req, res, next) => {
-	let comment_id = req.body.id;
-	Comment.findById(comment_id, (err, comment) => {
-		if (err) {
-			return res.json({
-				action: "Error: " + err.message,
-				status: 'error',
-				code: 444
-			});
-		}
-
-		comment.remove((err) => {
-			if (err) {
-				return res.json({
-					action: "Error: " + err.message,
-					status: 'error',
-					code: 444
-				});
-			} else {
-				return res.json({
-					action: 'Comment deleted',
-					status: 'ok',
-					code: 200
-				});
-			}
-		});
-	});
+// Delete User //
+router.post("/delete", (req, res, next) => {
+  let commentId = req.body.id;
+  Comment.findById(commentId, (err, data) => {
+    if (err) {
+      return res.json({
+        action: "Error: " + err.message,
+        status: "error",
+        code: 444
+      });
+    }
+    let Comment = data;
+    Comment.deleted = true;
+    Comment.save(err => {
+      if (err) {
+        return res.json({
+          action: "Error: " + err.message,
+          status: "error",
+          code: 444
+        });
+      } else {
+        return res.json({
+          action: "Comment deleted",
+          status: "ok",
+          code: 200
+        });
+      }
+    });
+  });
 });
 
 // Vote
