@@ -249,6 +249,14 @@ router.post("/vote", (req, res, next) => {
 router.get("/all", (req, res, next) => {
   return Post.aggregate([
     {
+      $match: {
+        status: "ok",
+      }
+    },
+    {
+      $sort: { createdAt: -1, _id: -1 },
+    },
+    {
       $lookup: {
         from: "users",
         localField: "user",
@@ -293,6 +301,14 @@ router.get("/all_close", (req, res, next) => {
   let $skip = parseInt(req.query.skip, 10);
 
   return Post.aggregate([
+    {
+      $match: {
+        status: "ok",
+      }
+    },
+    {
+      $sort: { createdAt: -1, _id: -1 },
+    },
     {
       $geoNear: {
         near: {
