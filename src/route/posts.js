@@ -319,9 +319,9 @@ router.post("/vote", (req, res, next) => {
 // Search methods
 
 // Get all post
-router.get("/all", (req, res, next) => {
+router.get("/all/:userId", (req, res, next) => {
   const { ObjectId } = mongoose.Types;
-  let user = req.body.user;
+  let userId = req.params.userId;
   return Post.aggregate([
     {
       $match: {
@@ -360,20 +360,22 @@ router.get("/all", (req, res, next) => {
         authorId: 1,
         type: 1,
         anonymus: 1,
-        // votedNegative: {
-        //   $cond: {
-        //     if: { $setIsSubset: [[ObjectId(user)], '$negativeVotes'] },
-        //     then: true,
-        //     else: false,
-        //   },
-        // },
-        // votedPositive: {
-        //   $cond: {
-        //     if: { $setIsSubset: [[ObjectId(user)], '$positiveVotes'] },
-        //     then: true,
-        //     else: false,
-        //   },
-        // },
+        positiveVotes: 1,
+        negativeVotes: 1,
+        votedNegative: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$negativeVotes'] },
+            then: true,
+            else: false,
+          },
+        },
+        votedPositive: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$positiveVotes'] },
+            then: true,
+            else: false,
+          },
+        },
       }
     }
   ]).then(resp => {
@@ -384,20 +386,15 @@ router.get("/all", (req, res, next) => {
   });
 });
 
-router.get("/all_close", (req, res, next) => {
+router.get("/all_close/:userId", (req, res, next) => {
   let lat = parseFloat(req.query.lat, 10);
   let lng = parseFloat(req.query.lng, 10);
   let $skip = parseInt(req.query.skip, 10);
 
+  const { ObjectId } = mongoose.Types;
+  let userId = req.params.userId;
+
   return Post.aggregate([
-    {
-      $match: {
-        status: "ok",
-      }
-    },
-    {
-      $sort: { createdAt: -1, _id: -1 },
-    },
     {
       $geoNear: {
         near: {
@@ -408,6 +405,14 @@ router.get("/all_close", (req, res, next) => {
         maxDistance: 5000,
         spherical: true
       }
+    },
+    {
+      $match: {
+        status: "ok",
+      }
+    },
+    {
+      $sort: { createdAt: -1, _id: -1 },
     },
     { $skip },
     { $limit: 10 },
@@ -439,7 +444,21 @@ router.get("/all_close", (req, res, next) => {
         status: 1,
         authorId: 1,
         type: 1,
-        anonymus: 1
+        anonymus: 1,
+        votedNegative: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$negativeVotes'] },
+            then: true,
+            else: false,
+          },
+        },
+        votedPositive: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$positiveVotes'] },
+            then: true,
+            else: false,
+          },
+        },
       }
     }
   ])
@@ -455,9 +474,10 @@ router.get("/all_close", (req, res, next) => {
 });
 
 // Get by id
-router.get("/id/:post_id", async (req, res, next) => {
+router.get("/id/:post_id/:userId", async (req, res, next) => {
   const { ObjectId } = mongoose.Types;
   let post_id = req.params.post_id;
+  let userId = req.params.userId;
 
   const [post] = await Post.aggregate([
     {
@@ -493,7 +513,21 @@ router.get("/id/:post_id", async (req, res, next) => {
         status: 1,
         authorId: 1,
         type: 1,
-        anonymus: 1
+        anonymus: 1,
+        votedNegative: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$negativeVotes'] },
+            then: true,
+            else: false,
+          },
+        },
+        votedPositive: {
+          $cond: {
+            if: { $setIsSubset: [[ObjectId(userId)], '$positiveVotes'] },
+            then: true,
+            else: false,
+          },
+        },
       }
     }
   ]);
