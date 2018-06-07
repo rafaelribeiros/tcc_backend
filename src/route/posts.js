@@ -130,123 +130,198 @@ router.post("/delete", (req, res, next) => {
 
 // Vote
 router.post("/vote", (req, res, next) => {
+  const { ObjectId } = mongoose.Types;
   let post = req.body.post;
-  let value = req.body.value;
+  let vote = req.body.value;
   let user = req.body.user;
 
-  Vote.findOne(
-    {
-      post: post,
-      user: user
-    },
-    (err, vote) => {
-      if (!vote) {
-        // Vote doesn't exist
-
-        if (value == 0) {
-          return res.json({
-            action: "Error: Vote doesn't exist, value can't be zero",
-            status: "error",
-            code: 444
-          });
-        }
-
-        // Create vote
-        vote = new Vote({
-          user: user,
-          post: post,
-          value: value
-        });
-        vote.save(err => {
-          if (err) {
-            return res.json({
-              action: "Error: " + err.message,
-              status: "error",
-              code: 444
-            });
-          } else {
-            // Karma Change
-            Post.findById(post, (err, data) => {
-              data.karma += parseInt(value);
-            });
-
-            return res.json({
-              action: "Vote created",
-              vote: vote,
-              status: "ok",
-              code: 200
-            });
-          }
-        });
-      } else {
-        // update vote
-        let removedValue = vote.value;
-        vote.remove();
-
-        if (value != 0) {
-          vote = new Vote({
-            user: user,
-            post: post,
-            value: value
-          });
-          vote.save(err => {
-            if (err) {
-              return res.json({
-                action: "Error: " + err.message,
-                status: "error",
-                code: 444
-              });
-            } else {
-              // Karma Change
-              Post.findById(post, (err, data) => {
-                if (err) {
-                  return res.json({
-                    action: "Error: " + err.message,
-                    status: "error",
-                    code: 444
-                  });
-                }
-
-                data.karma += parseInt(value) - removedValue;
-                data.save();
-
-                return res.json({
-                  action: "Vote created",
-                  vote: vote,
-                  status: "ok",
-                  code: 200
-                });
-              });
-            }
-          });
-        } else {
-          Post.findById(post, (err, data) => {
-            if (err) {
-              return res.json({
-                action: "Error: " + err.message,
-                status: "error",
-                code: 444
-              });
-            }
-            data.karma -= removedValue;
-            data.save();
-
-            return res.json({
-              action: "Vote deleted",
-              status: "ok",
-              code: 200
-            });
-          });
-        }
+  if(vote === 1){
+   return Post.findOneAndUpdate(
+      {
+        _id: ObjectId(post),
+      },
+      {
+        $pull: { negativeVotes: ObjectId(user) },
+        $inc: { karma: 1 },
+        $addToSet: { positiveVotes: ObjectId(user) },
+      },
+      {
+        new: true,
+        projection: {
+          __v: 0,
+          comments: 0,
+          likes: 0,
+          reports: 0,
+        },
+      },
+    ).then((resp) => {
+      if (resp !== null) {
+        return res.status(201).json({ payload: resp });
       }
-    }
-  );
+      return res.status(201).json({ payload: [] });
+    });
+  } else {
+    Post.findOneAndUpdate(
+      {
+        _id: ObjectId(post),
+      },
+      {
+        $pull: { positiveVotes: ObjectId(user) },
+        $inc: { karma: - 1 },
+        $addToSet: { negativeVotes: ObjectId(user) },
+      },
+      {
+        new: true,
+        projection: {
+          __v: 0,
+          comments: 0,
+          likes: 0,
+          reports: 0,
+        },
+      },
+    ).then((resp) => {
+      if (resp !== null) {
+        return res.status(201).json({ payload: resp });
+      }
+      return res.status(201).json({ payload: [] });
+    });
+  }
+
+  // Vote.findOne(
+  //   {
+  //     post: post,
+  //     user: user
+  //   },
+  //   (err, vote) => {
+  //     console.log(vote)
+  //     if (!vote) {
+  //       // Vote doesn't exist
+
+  //       if (value == 0) {
+  //         return res.json({
+  //           action: "Error: Vote doesn't exist, value can't be zero",
+  //           status: "error",
+  //           code: 444
+  //         });
+  //       }
+
+  //       // Create vote
+  //       vote = new Vote({
+  //         user: user,
+  //         post: post,
+  //         value: value
+  //       });
+  //       vote.save(err => {
+  //         if (err) {
+  //           return res.json({
+  //             action: "Error: " + err.message,
+  //             status: "error",
+  //             code: 444
+  //           });
+  //         } else {
+  //           // Karma Change
+  //           // Post.findById(post, (err, data) => {
+  //           //   console.log(data)
+  //           //   data.karma += parseInt(value);
+  //           // });
+
+  //           Post.findOneAndUpdate(
+  //             {
+  //               _id: ObjectId(post),
+  //             },
+  //             {
+  //               $inc: { karma: 1 },
+  //             },
+  //             {
+  //               new: true,
+  //               projection: {
+  //                 __v: 0,
+  //                 comments: 0,
+  //                 likes: 0,
+  //                 reports: 0,
+  //               },
+  //             },
+  //           )
+
+  //           return res.json({
+  //             action: "Vote created",
+  //             vote: vote,
+  //             status: "ok",
+  //             code: 200
+  //           });
+  //         }
+  //       });
+  //     } else {
+  //       // update vote
+  //       let removedValue = vote.value;
+  //       vote.remove();
+
+  //       if (value != 0) {
+  //         vote = new Vote({
+  //           user: user,
+  //           post: post,
+  //           value: value
+  //         });
+  //         vote.save(err => {
+  //           if (err) {
+  //             return res.json({
+  //               action: "Error: " + err.message,
+  //               status: "error",
+  //               code: 444
+  //             });
+  //           } else {
+  //             // Karma Change
+  //             Post.findById(post, (err, data) => {
+  //               if (err) {
+  //                 return res.json({
+  //                   action: "Error: " + err.message,
+  //                   status: "error",
+  //                   code: 444
+  //                 });
+  //               }
+
+  //               data.karma += parseInt(value) - removedValue;
+  //               data.save();
+
+  //               return res.json({
+  //                 action: "Vote created",
+  //                 vote: vote,
+  //                 status: "ok",
+  //                 code: 200
+  //               });
+  //             });
+  //           }
+  //         });
+  //       } else {
+  //         Post.findById(post, (err, data) => {
+  //           if (err) {
+  //             return res.json({
+  //               action: "Error: " + err.message,
+  //               status: "error",
+  //               code: 444
+  //             });
+  //           }
+  //           data.karma -= removedValue;
+  //           data.save();
+
+  //           return res.json({
+  //             action: "Vote deleted",
+  //             status: "ok",
+  //             code: 200
+  //           });
+  //         });
+  //       }
+  //     }
+  //   }
+  // );
 });
 
 // Search methods
 
 // Get all post
 router.get("/all", (req, res, next) => {
+  const { ObjectId } = mongoose.Types;
+  let user = req.body.user;
   return Post.aggregate([
     {
       $match: {
@@ -284,7 +359,21 @@ router.get("/all", (req, res, next) => {
         status: 1,
         authorId: 1,
         type: 1,
-        anonymus: 1
+        anonymus: 1,
+        // votedNegative: {
+        //   $cond: {
+        //     if: { $setIsSubset: [[ObjectId(user)], '$negativeVotes'] },
+        //     then: true,
+        //     else: false,
+        //   },
+        // },
+        // votedPositive: {
+        //   $cond: {
+        //     if: { $setIsSubset: [[ObjectId(user)], '$positiveVotes'] },
+        //     then: true,
+        //     else: false,
+        //   },
+        // },
       }
     }
   ]).then(resp => {
@@ -454,22 +543,24 @@ router.get("/create_dump", (req, res, next) => {
 
 // Delete All
 router.post("/all_delete", (req, res, next) => {
-  Post.find({}, (err, data) => {
-    let posts = data;
+  return Post.deleteMany( { "status" : "ok" }).
+  then((result) => res.json())
+  // Post.deleteMany({}, (err, data) => {
+  //   let posts = data;
 
-    for (const i in posts) {
-      if (posts.hasOwnProperty(i)) {
-        const element = posts[i];
-        element.remove();
-      }
-    }
+  //   for (const i in posts) {
+  //     if (posts.hasOwnProperty(i)) {
+  //       const element = posts[i];
+  //       element.remove();
+  //     }
+  //   }
 
-    return res.json({
-      action: "All posts deleted",
-      status: "ok",
-      code: 200
-    });
-  });
+  //   return res.json({
+  //     action: "All posts deleted",
+  //     status: "ok",
+  //     code: 200
+  //   });
+  // });
 });
 
 module.exports = router;

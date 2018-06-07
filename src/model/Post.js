@@ -7,6 +7,14 @@ const postSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
+	negativeVotes:{
+		type: [mongoose.Schema.Types.ObjectId],
+		default: [],
+	},
+	positiveVotes: {
+		type: [mongoose.Schema.Types.ObjectId],
+		default: [],
+	},
 	deleted: {
 		type: Boolean,
 		default: false
