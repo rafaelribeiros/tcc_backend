@@ -6,6 +6,8 @@ const router = express.Router();
 const User = require('model/User');
 const bcrypt = require('bcrypt-nodejs');
 
+const mongoose = require("mongoose");
+
 router.post('/login', (req, res, next) => {
   let email = req.body.email;
   let password = req.body.password
@@ -35,12 +37,12 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/approve', (req, res, next) => {
+  const { ObjectId } = mongoose.Types;
   let userId = req.body.userId;
   let verifyImage = req.body.verifyImage;
 
-  User.findById(user_id, (err, user) => {
-    if (err) return handleError(err);
-
+  User.findById(ObjectId(userId), (err, user) => {
+    // if (err) return handleError(err);
     if (user) {
       user.status = "PENDING";
       user.verifyImage = verifyImage
@@ -67,7 +69,6 @@ router.post('/approve', (req, res, next) => {
         code: 401
       });
     }
-
   });
 });
 
